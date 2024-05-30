@@ -3,6 +3,26 @@
 #' @param shapley object of class 'shapley', as returned by the 'shapley' function
 #' @param plot character, specifying the type of the plot, which can be either
 #'            'bar', 'waffle', or 'shap'. The default is 'bar'.
+#' @param method character, specifying the method used for identifying the most
+#'               important features according to their weighted SHAP values.
+#'               The default selection method is "lowerCI", which includes
+#'               features whose lower weighted confidence interval exceeds the
+#'               predefined 'cutoff' value (default is relative SHAP of 1%).
+#'               Alternatively, the "mean" option can be specified, indicating
+#'               any feature with normalized weighted mean SHAP contribution above
+#'               the specified 'cutoff' should be selected. Another
+#'               alternative options is "shapratio", a method that filters
+#'               for features where the proportion of their relative weighted SHAP
+#'               value exceeds the 'cutoff'. This approach calculates the relative
+#'               contribution of each feature's weighted SHAP value against the
+#'               aggregate of all features, with those surpassing the 'cutoff'
+#'               being selected as top feature.
+#' @param cutoff numeric, specifying the cutoff for the method used for selecting
+#'               the top features.
+#' @param top_n_features integer. if specified, the top n features with the
+#'                       highest weighted SHAP values will be selected, overrullung
+#'                       the 'cutoff' and 'method' arguments.
+#' @param features character vector, specifying the feature to be plotted.
 #' @param legendstyle character, specifying the style of the plot legend, which
 #'                    can be either 'continuous' (default) or 'discrete'. the
 #'                    continuous legend is only applicable to 'shap' plots and
@@ -65,6 +85,10 @@
 
 shapley.plot <- function(shapley,
                          plot = "bar",
+                         method = "lowerCI",
+                         cutoff = 0.0,
+                         top_n_features = NULL,
+                         features = NULL,
                          legendstyle = "continuous",
                          scale_colour_gradient = NULL) {
 
@@ -79,39 +103,85 @@ shapley.plot <- function(shapley,
     stop("plot must be either 'bar', 'waffle', or 'shap'")
   }
 
-  index <- order(- shapley$summaryShaps$normalized_mean)
-  features <- shapley$summaryShaps$feature[index]
-  normalized_mean <- shapley$summaryShaps$normalized_mean[index]
-  shapratio <- shapley$summaryShaps$shapratio[index]
+  # Feature selection
+  # ============================================================
+  select <- shapley.feature.selection(shapley = shapley,
+                                      method = method,
+                                      cutoff = cutoff,
+                                      top_n_features = top_n_features,
+                                      features = features)
+
+  shapley   <- select$shapley                    # update the data for different plots
+  features  <- select$features
+  mean      <- select$mean
+  shapratio <- select$shapratio
+
 
   # Print the bar plot
   # ============================================================
   if (plot == "bar") {
-    Plot <- shapley$plot
+    shapley$summaryShaps$feature <- factor(
+      shapley$summaryShaps$feature,
+      levels = shapley$summaryShaps$feature[order(
+        shapley$summaryShaps[["mean"]])])
+    #summaryShaps <<- summaryShaps
+    ftr <- shapley$summaryShaps$feature
+    nrmm <- shapley$summaryShaps$mean
+    lci <- shapley$summaryShaps$lowerCI
+    uci <- shapley$summaryShaps$upperCI
+
+    Plot <- ggplot(data = NULL,
+                   aes(x = ftr,
+                       y = nrmm)) +
+      geom_col(fill = "#07B86B", alpha = 0.8) +
+      geom_errorbar(aes(ymin = lci,
+                        ymax = uci),
+                    width = 0.2, color = "#7A004BF0",
+                    alpha = 0.75, linewidth = 0.7) +
+      coord_flip() +  # Rotating the graph to have mean values on X-axis
+      ggtitle("") +
+      xlab("Features\n") +
+      ylab("\nMean absolute SHAP contributions with 95% CI") +
+      theme_classic() +
+      # Reduce top plot margin
+      theme(plot.margin = margin(t = -0.5,
+                                 r = .25,
+                                 b = .25,
+                                 l = .25,
+                                 unit = "cm")) +
+      # Set lower limit of expansion to 0
+      scale_y_continuous(expand = expansion(mult = c(0, 0.05)))
   }
 
-  # Calculate the percentages
-  percentage <- round((normalized_mean / sum(normalized_mean) * 100), 2)
+  else if (plot == "waffle") {
 
-  round_to_half <- function(x) {
-    return(round(x * 2) / 2)
-  }
-  shapratio <- round_to_half(shapratio*400)
+    round_to_half <- function(x) {
+      return(round(x * 2) / 2)
+    }
 
-  # Create a factor with the percentage for the legend
-  legend <- paste0(features, " (", percentage, "%)")
-  # Order the legend by descending percentage
-  #legend <- factor(legend, levels = legend[order(-percentage)])
+    # Calculate the percentages
+    percentage <- round((mean / sum(mean) * 100), 2)
 
-  if (plot == "waffle") {
+    shapratio <- round_to_half(shapratio*400)
+
+    # Create a factor with the percentage for the legend
+    legend <- paste0(features, " (", percentage, "%)")
+    # Order the legend by descending percentage
+    #legend <- factor(legend, levels = legend[order(-percentage)])
     names(shapratio) <- as.character(legend)
-    Plot <- waffle(shapratio, rows = 20, size = 1,
+
+    colors <- NA
+    if (length(shapratio) >= 9) {
+      color <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+      colors <- sample(color, length(shapratio))
+    }
+
+    Plot <- waffle(shapratio, rows = 20, size = 1, colors = colors,
                    title = "Weighted mean SHAP contributions",
                    legend_pos = "right")
   }
 
-  if (plot == "shap") {
-
+  else if (plot == "shap") {
     # STEP 3: PLOT
     # ============================================================
     Plot <- shapley$contributionPlot +
@@ -159,9 +229,13 @@ shapley.plot <- function(shapley,
                                midpoint = 0.5)
     }
   }
+  else {
+    stop("plot must be either 'bar', 'waffle', or 'shap'")
+  }
+
+
 
   print(Plot)
-
   return(Plot)
 }
 

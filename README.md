@@ -1,16 +1,17 @@
-> __CITATION__: _Haghish, E. F. (2023). Weighted Mean Shapley Values with Confidence Intervals for Machine Learning Grids and Stacked Ensembles [computer software]. Url: <https://github.com/haghish/shapley>_
+
+> - __Software Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Selection in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
 
 - - -
 
 
 <a href="https://github.com/haghish/shapley"><img src='man/figures/logo.png' align="right" height="200" /></a>
   
-  __`shapley`__ : Weighted Mean Shapley Values with Confidence Intervals for Machine Learning Grids and Stacked Ensembles
+  __`shapley`__ : Weighted Mean SHAP for Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
 ================================================================================
 
 ## Introduction
 
-The `shapley` R package addresses a significant limitation in machine learning research by providing a method to calculate the weighted mean and confidence intervals of __SHapley Additive exPlanations__, commonly known as __SHAP values__ across machine learning grids and stacked ensemble models. This approach enhances the stability and reliability of SHAP values, making the determination of important features more transparent and potentially more reproducible. Traditionally, the focus has been on reporting SHAP values from a single  'best' model, which can be problematic under conditions of severe class imbalance, where a universally accepted 'best' model may not exist. In addition, models with different parameters, might result in different evaluations of SHAP contributions and such variablity is also meaningful for researchers who wish to understand important features relevant to a model. In such scenarios, the SHAP values from a single model may not be representative of other models. The `shapley` package fills a critical gap by proposing methodology and enabling the computation of SHAP values for multiple machine learning models such as a fine-tuning grid search, and stacked ensemble models. 
+The `shapley` R package addresses a significant limitation in machine learning research by providing a method to calculate the weighted mean and confidence intervals of __SHapley Additive exPlanations__, commonly known as __SHAP values__ across machine learning grids and stacked ensemble models. This approach enhances the stability and reliability of SHAP values, making the determination of important features more transparent and potentially more reproducible. Traditionally, the focus has been on reporting SHAP values from a single  'best' model, which can be problematic under conditions of severe class imbalance, where a universally accepted 'best' model may not exist. In addition, models with different parameters, might result in different evaluations of SHAP contributions and such variablity is also meaningful for researchers who wish to understand important features relevant to a model. In other words, SHAP values are unstable and varry across models, a limitation that is often overlooked in the literature by reporting the SHAP contributions of the 'best' model. In such scenarios, the SHAP values from a single model may not be representative of other models. The `shapley` package fills a critical gap by proposing methodology and enabling the computation of SHAP values for multiple machine learning models such as a fine-tuning grid search, and stacked ensemble models. This method computes weighted mean SHAP contributions, considering the performance of the model, to compute more stable SHAP values that also reflect of the variations across models. 
 
 ### Limitations in Current Machine Learning Research
 
@@ -62,7 +63,7 @@ grid <- h2o.grid(algorithm = "gbm", y = y, training_frame = prostate,
                  seed = 2023, fold_assignment = "Modulo", nfolds = 10,
                  keep_cross_validation_predictions = TRUE)
 
-result <- shapley(grid, newdata = prostate, plot = TRUE)
+result <- shapley(grid, newdata = prostate, performance_metric = "aucpr", plot = TRUE)
 ```
 
 In the example above, the `result` object would be a _list of class `shapley`_, which in cludes the information such as weighted mean and weighted confidence intervals as well as other metrics regarding SHAP contributions of different features. 
@@ -81,7 +82,7 @@ shapley.plot(result, plot = "bar")
 
 Another type of plot, that is also useful for identifying important features is 
 __`waffle`__ plot, by default showing any feature that at least has contributed 
-0.5% to the overall explained SHAP values across features. 
+0.25% to the overall explained SHAP values across features. 
 
 ```r
 shapley.plot(result, plot = "waffle")
@@ -97,10 +98,12 @@ shapley.plot(result, plot="shap")
 
 > Note: the weighted mean SHAP contribution plot of observations is expected to more clearly differentiate between how different values of a feature affect the outcome. 
 
+* Weighted mean SHAP contributions of all models from the tuning grid
 <img src='man/figures/shap.png' align="center" height="400" />
 
-> For instance, in the plot below, the effect of "GLEASON" feature on the outcome is more clearly differentiated between different values of the feature, compared to the plot of SHAP contributions of a _the best_ model, as shown below. As you see, subjects with very high SHAP values that are shown in the _best model_ below are not present in the plot of weighted mean SHAP contributions, meaning that different models did not agree on the effect of "GLEASON" feature on the outcome and thus, the voice of different models is taken into account, weighted by their performance metric. It is also evident that the SHAP contributions of the weighted mean SHAP model are more clearly demonstrate the relationship of the feature on the outcome. See for example, the 'DPROS' feature, where the SHAP values are somehow well-clustered in the weighted mean SHAP plot, indicating that collectively, the models clearly see a pattern between increased intensity of 'DPROS' with the outcome. 
+> For instance, in the plot above, the effect of "GLEASON" feature on the outcome is more clearly differentiated between different values of the feature, compared to the plot of SHAP contributions of a _the best_ model, as shown below. As you see, subjects with very high SHAP values that are shown in the _best model_ below are not present in the plot of weighted mean SHAP contributions, meaning that different models did not agree on the effect of "GLEASON" feature on the outcome and thus, the voice of different models is taken into account, weighted by their performance metric. It is also evident that the SHAP contributions of the weighted mean SHAP model are more clearly demonstrate the relationship of the feature on the outcome. See for example, the 'DPROS' feature, where the SHAP values are somehow well-clustered in the weighted mean SHAP plot, indicating that collectively, the models clearly see a pattern between increased intensity of 'DPROS' with the outcome. 
 
+* SHAP contributions of the best model
 <img src='man/figures/best.png' align="center" height="400" />
 
 ### Significance testing across features
@@ -174,6 +177,6 @@ The package is compatible with machine learning grids or stacked ensemble models
 
 ## About the author
 
-The methodology implemented in this software as well as the software itself was developed by [E.F. Haghish](https://github.com/haghish/), who is a researcher at Department of Psychology, University of Oslo, researching applications of machine learning for mental health research. 
+The methodology implemented in this software as well as the software itself was developed by [E.F. Haghish](https://github.com/haghish/), who is a researcher at Department of Psychology, University of Oslo, researching applications of machine learning for mental health. 
 
 > __Twitter: [@haghish](https://twitter.com/Haghish)__

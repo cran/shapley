@@ -10,12 +10,13 @@ shapley(
   models,
   newdata,
   plot = TRUE,
-  family = "binary",
-  performance_metric = c("aucpr"),
+  performance_metric = "r2",
+  standardize_performance_metric = FALSE,
+  performance_type = "xval",
+  minimum_performance = 0,
   method = c("lowerCI"),
-  cutoff = 0.01,
-  top_n_features = NULL,
-  normalize_to = "upperCI"
+  cutoff = 0,
+  top_n_features = NULL
 )
 }
 \arguments{
@@ -31,20 +32,38 @@ on the training dataset will be reported.}
 \item{plot}{logical. if TRUE, the weighted mean and confidence intervals of
 the SHAP values are plotted. The default is TRUE.}
 
-\item{family}{character. currently only "binary" classification models trained
-by h2o machine learning are supported.}
-
 \item{performance_metric}{character, specifying the performance metric to be
 used for weighting the SHAP values (mean and 95% CI). The default is
-"aucpr" (area under the precision-recall curve). Other options include
-"auc" (area under the ROC curve), "mcc" (Matthews correlation coefficient),
+"r2" (R Squared).
+For binary classification, other options include
+"aucpr" (area under the precision-recall curve),
+"auc" (area under the ROC curve),
 and "f2" (F2 score).}
+
+\item{standardize_performance_metric}{logical. if TRUE, performance_metric, which is
+used as weights vector is standardized such
+that the sum of the weights vector would be equal
+to the length of the vector. the default value
+is FALSE.}
+
+\item{performance_type}{character, specifying where the performance metric should
+be retrieved from. "train" means the performance of the
+training process should be reported, "valid" indicates that
+the performance of the validation process should be reported,
+and "xval" means the cross-validation performance to be
+retrieved.}
+
+\item{minimum_performance}{the minimum performance metric for a recognizable model.
+any model with performance equal or lower than this
+argument will have weight of zero in computing the
+weighted mean and CI SHAP values. the default value is
+zero.}
 
 \item{method}{character, specifying the method used for identifying the most
 important features according to their weighted SHAP values.
 The default selection method is "lowerCI", which includes
 features whose lower weighted confidence interval exceeds the
-predefined 'cutoff' value (default is relative SHAP of 1%).
+predefined 'cutoff' value (default is 0).
 Alternatively, the "mean" option can be specified, indicating
 any feature with normalized weighted mean SHAP contribution above
 the specified 'cutoff' should be selected. Another
@@ -56,22 +75,15 @@ aggregate of all features, with those surpassing the 'cutoff'
 being selected as top feature.}
 
 \item{cutoff}{numeric, specifying the cutoff for the method used for selecting
-the top features.}
+the top features. the default is zero, which means that all
+features with the "method" criteria above zero will be selected.}
 
 \item{top_n_features}{integer. if specified, the top n features with the
 highest weighted SHAP values will be selected, overrullung
-the 'cutoff' and 'method' arguments.}
-
-\item{normalize_to}{character. The default value is "upperCI", which sets the feature with
-the maximum SHAP value to one, allowing the higher CI to
-go beyond one. Setting this value is mainly for aesthetic
-reason to adjust the Plot, but also, it can influence the
-feature selection process, depending on the method in use,
-because it changes how the SHAP values should be normalized.
-the alternative is 'feature', specifying that
-in the normalization of the SHAP values, the maximum confidence
-interval of the weighted SHAP values should be equal to
-"1", in order to limit the plot values to maximum of one.}
+the 'cutoff' and 'method' arguments. specifying top_n_feature
+is also a way to reduce computation time, if many features
+are present in the data set. The default is NULL, which means
+the shap values will be computed for all features.}
 }
 \value{
 a list including the GGPLOT2 object, the data frame of SHAP values,
@@ -126,7 +138,7 @@ aml <- h2o.automl(y = y, training_frame = prostate, max_runtime_secs = 120,
 ### call 'shapley' function to compute the weighted mean and weighted confidence intervals
 ### of SHAP values across all trained models.
 ### Note that the 'newdata' should be the testing dataset!
-result <- shapley(models = aml, newdata = prostate, plot = TRUE)
+result <- shapley(models = aml, newdata = prostate, performance_metric = "aucpr", plot = TRUE)
 
 #######################################################
 ### PREPARE H2O Grid (takes a couple of minutes)
@@ -140,7 +152,7 @@ grid <- h2o.grid(algorithm = "gbm", y = y, training_frame = prostate,
                  seed = 2023, fold_assignment = "Modulo", nfolds = 10,
                  keep_cross_validation_predictions = TRUE)
 
-result2 <- shapley(models = grid, newdata = prostate, plot = TRUE)
+result2 <- shapley(models = grid, newdata = prostate, performance_metric = "aucpr", plot = TRUE)
 
 #######################################################
 ### PREPARE autoEnsemble STACKED ENSEMBLE MODEL
@@ -152,7 +164,8 @@ result2 <- shapley(models = grid, newdata = prostate, plot = TRUE)
 library(autoEnsemble)
 ids    <- c(h2o.get_ids(aml), h2o.get_ids(grid))
 autoSearch <- ensemble(models = ids, training_frame = prostate, strategy = "search")
-result3 <- shapley(models = autoSearch, newdata = prostate, plot = TRUE)
+result3 <- shapley(models = autoSearch, newdata = prostate,
+                   performance_metric = "aucpr", plot = TRUE)
 
 
 }
