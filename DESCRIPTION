@@ -1,7 +1,7 @@
 Package: shapley
 Type: Package
 Title: Weighted Mean SHAP for Feature Selection in ML Grid and Ensemble
-Version: 0.3
+Version: 0.4
 Authors@R: 
     person("E. F. Haghish",
            role = c("aut", "cre", "cph"),
@@ -47,8 +47,8 @@ URL: https://github.com/haghish/shapley,
         https://www.sv.uio.no/psi/english/people/academic/haghish/
 BugReports: https://github.com/haghish/shapley/issues
 NeedsCompilation: no
-Packaged: 2024-05-29 11:50:22 UTC; U-Shaped-Valley
+Packaged: 2024-10-23 00:03:11 UTC; haghish
 Author: E. F. Haghish [aut, cre, cph]
 Maintainer: E. F. Haghish <haghish@hotmail.com>
 Repository: CRAN
-Date/Publication: 2024-05-30 07:00:20 UTC
+Date/Publication: 2024-10-23 03:40:02 UTC

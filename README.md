@@ -1,13 +1,19 @@
 
-> - __Software Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Selection in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
-
+> - __Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Selection in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
 - - -
 
 
-<a href="https://github.com/haghish/shapley"><img src='man/figures/logo.png' align="right" height="200" /></a>
+<a href="https://github.com/haghish/shapley"><img src='man/figures/shapley.png' align="right" height="200" /></a>
+<br>
   
   __`shapley`__ : Weighted Mean SHAP for Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
 ================================================================================
+
+[![](https://www.r-pkg.org/badges/version/shapley?color=02C6F2)](https://cran.r-project.org/package=shapley)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/shapley?color=02F2C6)](https://cran.r-project.org/package=shapley) 
+<!--
+[![](man/figures/manual.svg)](https://CRAN.R-project.org/package=shapley)
+-->
 
 ## Introduction
 
@@ -68,9 +74,13 @@ result <- shapley(grid, newdata = prostate, performance_metric = "aucpr", plot =
 
 In the example above, the `result` object would be a _list of class `shapley`_, which in cludes the information such as weighted mean and weighted confidence intervals as well as other metrics regarding SHAP contributions of different features. 
 
-### Plotting SHAP values
+# Plotting SHAP values at multiple levels (subject, features, and domains)
 
 You can use the __`shapley.plot`__ function to plot the SHAP contributions:
+
+## Feature level
+
+### Barplot of important features based on weighted mean SHAP values
 
 1. To plot weighted mean SHAP contributions as well as weighted 95% confidence intervals, pass the `shapley object`, in this example, named `result`, and specify `"bar"`, to create a bar plot:
 
@@ -79,6 +89,8 @@ shapley.plot(result, plot = "bar")
 ```
 
 <img src='man/figures/bar.png' align="center" height="400" />
+
+### Waffle plot of important features based on weighted mean SHAP values
 
 Another type of plot, that is also useful for identifying important features is 
 __`waffle`__ plot, by default showing any feature that at least has contributed 
@@ -89,6 +101,8 @@ shapley.plot(result, plot = "waffle")
 ```
 
 <img src='man/figures/waffle.png' align="center" height="400" />
+
+### Mean SHAP contribution plot of important features based on weighted mean SHAP values
 
 Another type of plot is __`shap`__ plot, which shows the SHAP contributions of each feature for each observation (subject, or row in the data). This plot is useful for identifying the direction of the effect of each feature on the outcome, improving the transparency of the model. What is noteworthy about the __`shap`__ plot is that it visualizes the weighted mean SHAP contributions across all models, while taking the performance of the models into account. Therefore, this plot is expected to provide more stable SHAP explanations that how different values of a feature affect the outcome. 
 
@@ -105,6 +119,42 @@ shapley.plot(result, plot="shap")
 
 * SHAP contributions of the best model
 <img src='man/figures/best.png' align="center" height="400" />
+
+## Domain level
+
+Weighted mean SHAP values and their confidence intervals can also be computed for __Factors__ (A group of items) or __Domains__ (A group of correlated or related factors presenting a domain). For both, the `domain` argument should be specified so that the software compute the contribution of a cluster of items. There is no difference between _Factors_ and _Domains_, because for either, they need to be defined as a group of features (variables / columns) in the dataset. 
+
+```r
+print(shapley.plot(shapley = result,
+                   plot = "bar", method = "mean",
+                   domains = list(Demographic = c("RACE", "AGE"),
+                                  Cancer = c("VOL", "PSA", "GLEASON"),
+                                  Tests = c("DPROS", "DCAPS")),
+                   print = TRUE))
+
+```
+
+<img src='man/figures/domain.png' align="center" height="400" />
+
+The analysis results are also returned in a Table:
+
+```
+      feature       mean         sd          ci    lowerCI   upperCI
+1 Demographic 0.09730516 0.01304978 0.004669805 0.09263535 0.1019750
+2      Cancer 0.70783878 0.01747264 0.006252502 0.70158628 0.7140913
+3       Tests 0.19485606 0.01269251 0.004541957 0.19031411 0.1993980
+```
+
+## Subject level
+
+You can also compute weighted mean SHAP values for each subject (row) in the dataset. To do that, use the `shapley.row.plot` function. For example, to view the SHAP contributions and their confidence intervals for the 20th row in the dataset, type:
+
+```r
+shapley.row.plot(result, row_index = 20)
+```
+
+<img src='man/figures/row_index.png' align="center" height="400" />
+
 
 ### Significance testing across features
 
