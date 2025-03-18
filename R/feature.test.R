@@ -17,7 +17,7 @@
 # print(result$obs_diff)
 # print(result$p_value)
 
-test <- function(var1, var2, weights, n = 2000) {
+feature.test <- function(var1, var2, weights, n = 2000) {
   stopifnot(length(var1) == length(var2))
   stopifnot(length(weights) == length(var1))
 

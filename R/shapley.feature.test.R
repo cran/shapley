@@ -55,7 +55,7 @@
 #' }
 #' @export
 
-shapley.test <- function(shapley, features, n = 5000) {
+shapley.feature.test <- function(shapley, features, n = 5000) {
 
   # Syntax check
   # ============================================================
@@ -75,7 +75,7 @@ shapley.test <- function(shapley, features, n = 5000) {
 
   # Run the test
   # ============================================================
-  results <- test(var1, var2, weights, n)
+  results <- feature.test(var1, var2, weights, n)
 
   if (results$p_value < 0.05) {
     message(paste0("The difference between the two features is significant:\n",

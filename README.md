@@ -1,12 +1,12 @@
 
-> - __Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Selection in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
+> - __Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Assessment in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
 - - -
 
 
 <a href="https://github.com/haghish/shapley"><img src='man/figures/shapley.png' align="right" height="200" /></a>
 <br>
   
-  __`shapley`__ : Weighted Mean SHAP for Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
+  __`shapley`__ : Weighted Mean SHAP for Automatic and Robust Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
 ================================================================================
 
 [![](https://www.r-pkg.org/badges/version/shapley?color=02C6F2)](https://cran.r-project.org/package=shapley)
@@ -17,7 +17,7 @@
 
 ## Introduction
 
-The `shapley` R package addresses a significant limitation in machine learning research by providing a method to calculate the weighted mean and confidence intervals of __SHapley Additive exPlanations__, commonly known as __SHAP values__ across machine learning grids and stacked ensemble models. This approach enhances the stability and reliability of SHAP values, making the determination of important features more transparent and potentially more reproducible. Traditionally, the focus has been on reporting SHAP values from a single  'best' model, which can be problematic under conditions of severe class imbalance, where a universally accepted 'best' model may not exist. In addition, models with different parameters, might result in different evaluations of SHAP contributions and such variablity is also meaningful for researchers who wish to understand important features relevant to a model. In other words, SHAP values are unstable and varry across models, a limitation that is often overlooked in the literature by reporting the SHAP contributions of the 'best' model. In such scenarios, the SHAP values from a single model may not be representative of other models. The `shapley` package fills a critical gap by proposing methodology and enabling the computation of SHAP values for multiple machine learning models such as a fine-tuning grid search, and stacked ensemble models. This method computes weighted mean SHAP contributions, considering the performance of the model, to compute more stable SHAP values that also reflect of the variations across models. 
+The `shapley` R package addresses a significant limitation in _exploratory_ machine learning research by providing a method to calculate the _weighted mean ratio_ and confidence intervals of __SHapley Additive exPlanations__, commonly known as __SHAP values__ across machine learning grids and stacked ensemble models. This approach enhances the stability and reliability of SHAP values, making the determination of important features more transparent and potentially more reproducible. Traditionally, the focus has been on reporting SHAP values from a single  'best' model, which can be problematic under conditions of severe class imbalance, where a universally accepted 'best' model may not exist. In addition, models with different parameters, might result in different evaluations of SHAP contributions and such variablity is also meaningful for researchers who wish to understand important features relevant to a model. In other words, SHAP values are unstable and varry across models, a limitation that is often overlooked in the literature by reporting the SHAP contributions of the 'best' model. In such scenarios, the SHAP values from a single model may not be representative of other models. The `shapley` package fills a critical gap by proposing methodology and enabling the computation of SHAP values for multiple machine learning models such as a fine-tuning grid search, and stacked ensemble models. This method computes weighted mean SHAP contributions, considering the performance of the model, to compute more stable SHAP values that also reflect of the variations across models. 
 
 ### Limitations in Current Machine Learning Research
 
@@ -35,6 +35,11 @@ In particular, the `shapley` software addresses the following shortcomings, ofte
 ### Solutions implemented in the `shapley` R package
 
 The `shapley` R package computes the weighted average and confidence intervals of Shapley values from multiple machine learning models. By incorporating model performance metrics as weights, it addresses the variability in SHAP values across different models, which is often overlooked when relying on a single "best" model. This approach is particularly valuable in situations where defining the best model is challenging, such as with severe class imbalances (class rarity, caused by low-prevalence outcome). The package also facilitates more reliable computation of SHAP contributions across models and provides a basis for significance testing between features to ensure differences are not due to random chance. Furthermore, the package proposes several automated and transparent methods for identifying important features. These methods use various metrics to define importance, allowing for the selection of significant features based on SHAP contributions without pre-specifying number of top features (see below for details).
+
+> The shapley algorithm computes weighted mean SHAP values and their 95% confidence intervals for a set of homogeneous or heterogeneous machine learning models. The algorithm also computes mean and 95% confidence interval bootstrap SHAP values for a single model. Local SHAP values are at subject level (n) and global SHAP contributions are at feature level (p).
+<img src='man/figures/shapley_algorithm.jpg' align="center" height="500" />
+
+
 
 ## Examples
 
@@ -100,7 +105,7 @@ __`waffle`__ plot, by default showing any feature that at least has contributed
 shapley.plot(result, plot = "waffle")
 ```
 
-<img src='man/figures/waffle.png' align="center" height="400" />
+<img src='man/figures/waffle.jpg' align="center" height="400" />
 
 ### Mean SHAP contribution plot of important features based on weighted mean SHAP values
 
@@ -113,19 +118,19 @@ shapley.plot(result, plot="shap")
 > Note: the weighted mean SHAP contribution plot of observations is expected to more clearly differentiate between how different values of a feature affect the outcome. 
 
 * Weighted mean SHAP contributions of all models from the tuning grid
-<img src='man/figures/shap.png' align="center" height="400" />
+<img src='man/figures/shap.jpeg' align="center" height="400" />
 
 > For instance, in the plot above, the effect of "GLEASON" feature on the outcome is more clearly differentiated between different values of the feature, compared to the plot of SHAP contributions of a _the best_ model, as shown below. As you see, subjects with very high SHAP values that are shown in the _best model_ below are not present in the plot of weighted mean SHAP contributions, meaning that different models did not agree on the effect of "GLEASON" feature on the outcome and thus, the voice of different models is taken into account, weighted by their performance metric. It is also evident that the SHAP contributions of the weighted mean SHAP model are more clearly demonstrate the relationship of the feature on the outcome. See for example, the 'DPROS' feature, where the SHAP values are somehow well-clustered in the weighted mean SHAP plot, indicating that collectively, the models clearly see a pattern between increased intensity of 'DPROS' with the outcome. 
 
 * SHAP contributions of the best model
-<img src='man/figures/best.png' align="center" height="400" />
+<img src='man/figures/best.jpeg' align="center" height="400" />
 
 ## Domain level
 
 Weighted mean SHAP values and their confidence intervals can also be computed for __Factors__ (A group of items) or __Domains__ (A group of correlated or related factors presenting a domain). For both, the `domain` argument should be specified so that the software compute the contribution of a cluster of items. There is no difference between _Factors_ and _Domains_, because for either, they need to be defined as a group of features (variables / columns) in the dataset. 
 
 ```r
-print(shapley.plot(shapley = result,
+print(shapley.domain(shapley = result,
                    plot = "bar", method = "mean",
                    domains = list(Demographic = c("RACE", "AGE"),
                                   Cancer = c("VOL", "PSA", "GLEASON"),
@@ -139,7 +144,7 @@ print(shapley.plot(shapley = result,
 The analysis results are also returned in a Table:
 
 ```
-      feature       mean         sd          ci    lowerCI   upperCI
+      domain        mean         sd          ci    lowerCI   upperCI
 1 Demographic 0.09730516 0.01304978 0.004669805 0.09263535 0.1019750
 2      Cancer 0.70783878 0.01747264 0.006252502 0.70158628 0.7140913
 3       Tests 0.19485606 0.01269251 0.004541957 0.19031411 0.1993980

@@ -3,23 +3,16 @@
 #' @param shapley object of class 'shapley', as returned by the 'shapley' function
 #' @param plot character, specifying the type of the plot, which can be either
 #'            'bar', 'waffle', or 'shap'. The default is 'bar'.
-#' @param method character, specifying the method used for identifying the most
-#'               important features according to their weighted SHAP values.
-#'               The default selection method is "lowerCI", which includes
-#'               features whose lower weighted confidence interval exceeds the
-#'               predefined 'cutoff' value (default is relative SHAP of 1%).
-#'               Alternatively, the "mean" option can be specified, indicating
-#'               any feature with normalized weighted mean SHAP contribution above
-#'               the specified 'cutoff' should be selected. Another
-#'               alternative options is "shapratio", a method that filters
-#'               for features where the proportion of their relative weighted SHAP
-#'               value exceeds the 'cutoff'. This approach calculates the relative
-#'               contribution of each feature's weighted SHAP value against the
-#'               aggregate of all features, with those surpassing the 'cutoff'
-#'               being selected as top feature.
+#' @param method Character. The column name in \code{summaryShaps} used
+#'                           for feature selection. Default is \code{"mean"}, which
+#'                           selects important features which have weighted mean shap
+#'                           ratio (WMSHAP) higher than the specified cutoff. Other
+#'                           alternative is "lowerCI", which selects features which
+#'                           their lower bound of confidence interval is higher than
+#'                           the cutoff.
 #' @param cutoff numeric, specifying the cutoff for the method used for selecting
 #'               the top features.
-#' @param top_n_features integer. if specified, the top n features with the
+#' @param top_n_features Integer. If specified, the top n features with the
 #'                       highest weighted SHAP values will be selected, overrullung
 #'                       the 'cutoff' and 'method' arguments.
 #' @param features character vector, specifying the feature to be plotted.
@@ -82,11 +75,10 @@
 #' }
 #' @export
 
-
 shapley.plot <- function(shapley,
                          plot = "bar",
-                         method = "lowerCI",
-                         cutoff = 0.0,
+                         method = "mean",
+                         cutoff = 0.01,
                          top_n_features = NULL,
                          features = NULL,
                          legendstyle = "continuous",
@@ -105,16 +97,16 @@ shapley.plot <- function(shapley,
 
   # Feature selection
   # ============================================================
-  select <- shapley.feature.selection(shapley = shapley,
-                                      method = method,
-                                      cutoff = cutoff,
-                                      top_n_features = top_n_features,
-                                      features = features)
+  select <- feature.selection(shapley = shapley,
+                              method = method,
+                              cutoff = cutoff,
+                              top_n_features = top_n_features,
+                              features = features)
 
   shapley   <- select$shapley                    # update the data for different plots
   features  <- select$features
   mean      <- select$mean
-  shapratio <- select$shapratio
+  shapratio <- select$mean #also mean
 
 
   # Print the bar plot
@@ -141,7 +133,7 @@ shapley.plot <- function(shapley,
       coord_flip() +  # Rotating the graph to have mean values on X-axis
       ggtitle("") +
       xlab("Features\n") +
-      ylab("\nMean absolute SHAP contributions with 95% CI") +
+      ylab("\nWeighted Mean SHAP Ratio with 95% CI") +
       theme_classic() +
       # Reduce top plot margin
       theme(plot.margin = margin(t = -0.5,
