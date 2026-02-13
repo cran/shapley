@@ -2,46 +2,43 @@
 % Please edit documentation in R/shapley.domain.R
 \name{shapley.domain}
 \alias{shapley.domain}
-\title{compute and plot weighted mean SHAP contributions at group level (factors or domains)}
+\title{Compute and plot weighted mean SHAP contributions at group level (factors or domains)}
 \usage{
 shapley.domain(
   shapley,
   domains,
-  plot = "bar",
-  legendstyle = "continuous",
-  scale_colour_gradient = NULL,
-  print = FALSE
+  plot = TRUE,
+  print = FALSE,
+  colorcode = NULL,
+  xlab = "Domains"
 )
 }
 \arguments{
-\item{shapley}{object of class 'shapley', as returned by the 'shapley' function}
+\item{shapley}{Object of class \code{"shapley"}, as returned by the 'shapley' function}
 
-\item{domains}{character list, specifying the domains for grouping the features'
-contributions. Domains are clusters of features' names, that
-can be used to compute WMSHAP at higher level, along with
-their 95% confidence interval. This computation can be used to
-better understand how a cluster of features influence the
-outcome. Note that either of 'features' or 'domains' arguments
-can be specified at the time.}
+\item{domains}{Named list of character vectors. Each element name is a domain name;
+each element value is a character vector of feature names assigned to that domain.}
 
-\item{plot}{character, specifying the type of the plot, which can be either
-'bar', 'waffle', or 'shap'. The default is 'bar'.}
+\item{plot}{Logical. If \code{TRUE}, a bar plot of domain WMSHAP contributions is created.}
 
-\item{legendstyle}{character, specifying the style of the plot legend, which
-can be either 'continuous' (default) or 'discrete'. the
-continuous legend is only applicable to 'shap' plots and
-other plots only use 'discrete' legend.}
+\item{print}{Logical. If TRUE, prints the domain WMSHAP summary table.}
 
-\item{scale_colour_gradient}{character vector for specifying the color gradients
-for the plot.}
+\item{colorcode}{Character vector for specifying the color names for each domain in the plot.}
 
-\item{print}{logical. if TRUE, the WMSHAP summary table for the given row is printed}
+\item{xlab}{Character. Specify the ggplot 'xlab' label in the plot (default is "Domains")}
 }
 \value{
-ggplot object
+A list with:
+\describe{
+  \item{domainSummary}{Data frame with WMSHAP domain contributions and CI.}
+  \item{domainRatio}{Data frame with per-model WMSHAP domain contribution ratios.}
+  \item{plot}{A ggplot object (or NULL if plotting not requested/implemented).}
+}
 }
 \description{
-This function applies different criteria to visualize SHAP contributions
+Aggregates SHAP contributions across user-defined domains (groups of features),
+             computes weighted mean and an 95% CI across models, and
+             returns a plot plus summary tables.
 }
 \examples{
 
@@ -90,11 +87,11 @@ shapley.plot(result, plot = "bar")
 #######################################################
 ### DEFINE DOMAINS (GROUPS OF FEATURES OR FACTORS)
 #######################################################
-shapley.domain(shapley = shapley, plot = "bar",
+shapley.domain(shapley = result, plot = TRUE,
                domains = list(Demographic = c("RACE", "AGE"),
                               Cancer = c("VOL", "PSA", "GLEASON"),
                               Tests = c("DPROS", "DCAPS")),
-                              print = TRUE
+                              print = TRUE)
 }
 }
 \author{

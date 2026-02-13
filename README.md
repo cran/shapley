@@ -1,12 +1,12 @@
 
-> - __Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP for Feature Assessment in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
+> - __Citation__: _Haghish, E. F. (2023). shapley: Weighted Mean SHAP (WMSHAP) for Feature Assessment in ML Grid and Ensemble [computer software]_. URL: <https://CRAN.R-project.org/package=shapley>    
 - - -
 
 
 <a href="https://github.com/haghish/shapley"><img src='man/figures/shapley.png' align="right" height="200" /></a>
 <br>
   
-  __`shapley`__ : Weighted Mean SHAP for Automatic and Robust Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
+  __`shapley`__ : Weighted Mean SHAP (WMSHAP) for Automatic and Robust Feature Importance Assessment and Selection in Machine Learning Grid and Ensemble
 ================================================================================
 
 [![](https://www.r-pkg.org/badges/version/shapley?color=02C6F2)](https://cran.r-project.org/package=shapley)
@@ -95,17 +95,6 @@ shapley.plot(result, plot = "bar")
 
 <img src='man/figures/bar.png' align="center" height="400" />
 
-### Waffle plot of important features based on weighted mean SHAP values
-
-Another type of plot, that is also useful for identifying important features is 
-__`waffle`__ plot, by default showing any feature that at least has contributed 
-0.25% to the overall explained SHAP values across features. 
-
-```r
-shapley.plot(result, plot = "waffle")
-```
-
-<img src='man/figures/waffle.jpg' align="center" height="400" />
 
 ### Mean SHAP contribution plot of important features based on weighted mean SHAP values
 
@@ -201,8 +190,6 @@ Traditionally, the selection of a set number of significant features based on th
 
 However, the calculation of weighted means and 95% confidence intervals allows for a systematic approach to identify features that consistently contribute to the model, across different models. For instance, the default method in the `shapley` package considers features important if their weighted mean shap ration exceeds the specified cutoff. Another alternative is "`lowerCI`", which selects features that their lower bound of their weighted 95% confidence interval for the WMSHAP exceeds the cutoff. This means any feature with a stable relative contribution above the cutoff is deemed important. This method is also utilized in the `bar` plot, where features are ranked by their weighted mean SHAP values, and the cutoff is applied to the lower confidence interval. 
 
-This is demonstrated in the `waffle` plot, where features must contribute at least 0.5% to the overall weighted mean SHAP values to be selected.
-
 Between the "`lowerCI`" and "`mean`" methods, each has merits and limitations. "`LowerCI`" is more conservative, while "`mean`" focuses on the weighted mean shap ratios. 
 
 In this regard, the package also suggests a function for testing different criteria. Currently, implementing only `lowerCI` and `mean` criteria. following the examples above, the __`shapley.top`__ shows features that pass 
@@ -232,10 +219,10 @@ Stacked ensemble models integrate multiple base learner models' predictions, ass
 
 ## Supported Machine Learning models
 
-The package is compatible with machine learning grids or stacked ensemble models created using the [`h2o`](https://h2o.ai/blog/2022/shapley-values-a-gentle-introduction/) package, as well as the [`autoEnsemble`](https://cran.r-project.org/package=autoEnsemble) package in R.
+The package is compatible with machine learning grids or stacked ensemble models created using the [`h2o`](https://h2o.ai/) package, as well as the [`autoEnsemble`](https://cran.r-project.org/package=autoEnsemble) package in R.
 
 ## About the author
 
 The methodology implemented in this software as well as the software itself was developed by [E.F. Haghish](https://github.com/haghish/), who is a researcher at Department of Psychology, University of Oslo, researching applications of machine learning for mental health. 
 
-> __Twitter: [@haghish](https://twitter.com/Haghish)__
+> __Twitter: [@haghish](https://x.com/Haghish)__

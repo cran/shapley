@@ -1,28 +1,27 @@
-#' @title compute and plot weighted mean SHAP contributions at group level (factors or domains)
-#' @description This function applies different criteria to visualize SHAP contributions
-#' @param shapley object of class 'shapley', as returned by the 'shapley' function
-#' @param plot character, specifying the type of the plot, which can be either
-#'            'bar', 'waffle', or 'shap'. The default is 'bar'.
-#' @param domains character list, specifying the domains for grouping the features'
-#'                contributions. Domains are clusters of features' names, that
-#'                can be used to compute WMSHAP at higher level, along with
-#'                their 95% confidence interval. This computation can be used to
-#'                better understand how a cluster of features influence the
-#'                outcome. Note that either of 'features' or 'domains' arguments
-#'                can be specified at the time.
-#' @param legendstyle character, specifying the style of the plot legend, which
-#'                    can be either 'continuous' (default) or 'discrete'. the
-#'                    continuous legend is only applicable to 'shap' plots and
-#'                    other plots only use 'discrete' legend.
-#' @param scale_colour_gradient character vector for specifying the color gradients
-#'                              for the plot.
-#' @param print logical. if TRUE, the WMSHAP summary table for the given row is printed
+# ??? The running speed of this function can be improved
+
+#' @title Compute and plot weighted mean SHAP contributions at group level (factors or domains)
+#' @description Aggregates SHAP contributions across user-defined domains (groups of features),
+#'              computes weighted mean and an 95% CI across models, and
+#'              returns a plot plus summary tables.
+#' @param shapley Object of class \code{"shapley"}, as returned by the 'shapley' function
+#' @param domains Named list of character vectors. Each element name is a domain name;
+#'                each element value is a character vector of feature names assigned to that domain.
+#' @param plot Logical. If \code{TRUE}, a bar plot of domain WMSHAP contributions is created.
+#' @param colorcode Character vector for specifying the color names for each domain in the plot.
+#' @param print Logical. If TRUE, prints the domain WMSHAP summary table.
+#' @param xlab Character. Specify the ggplot 'xlab' label in the plot (default is "Domains")
 #' @importFrom stats na.omit aggregate formula
 #' @importFrom h2o h2o.shap_summary_plot h2o.getModel
 #' @importFrom ggplot2 scale_colour_gradient2 theme guides guide_legend guide_colourbar
 #'             margin element_text theme_classic labs ylab xlab ggtitle
 #' @author E. F. Haghish
-#' @return ggplot object
+#' @return A list with:
+#' \describe{
+#'   \item{domainSummary}{Data frame with WMSHAP domain contributions and CI.}
+#'   \item{domainRatio}{Data frame with per-model WMSHAP domain contribution ratios.}
+#'   \item{plot}{A ggplot object (or NULL if plotting not requested/implemented).}
+#' }
 #' @examples
 #'
 #' \dontrun{
@@ -66,37 +65,35 @@
 #' #######################################################
 #'
 #' shapley.plot(result, plot = "bar")
-# shapley.plot(result, plot = "waffle")
 #'
 #' #######################################################
 #' ### DEFINE DOMAINS (GROUPS OF FEATURES OR FACTORS)
 #' #######################################################
-#' shapley.domain(shapley = shapley, plot = "bar",
+#' shapley.domain(shapley = result, plot = TRUE,
 #'                domains = list(Demographic = c("RACE", "AGE"),
 #'                               Cancer = c("VOL", "PSA", "GLEASON"),
 #'                               Tests = c("DPROS", "DCAPS")),
-#'                               print = TRUE
-# ))
+#'                               print = TRUE)
 #' }
 #' @export
 
 shapley.domain <- function(shapley,
                            domains,
-                           plot = "bar",
-                           legendstyle = "continuous",
-                           scale_colour_gradient = NULL, #this is a BUG because it is not implemented
-                           # COLORCODE IS MISSING :(
-                           print = FALSE) {
+                           plot = TRUE,
+                           print = FALSE,
+                           colorcode = NULL,
+                           xlab = "Domains") {
 
   # Variable definitions
   # ============================================================
   DOMAINS <- names(domains)
+  COLORCODE <- c("#855C75FF", "#D9AF6BFF", "#AF6458FF","#736F4CFF","#526A83FF", "#625377FF", "#68855CFF", "#9C9C5EFF", "#A06177FF", "#8C785DFF", "#467378FF", "#7C7C7CFF")
   FILLCOLOR <- NULL
   mean      <- NA
+  Plot      <- NULL
 
-  # COLORCODE <- c("#07B86B", "#07a9b8","#b86207","#b8b207", "#b80786",
-  #                "#073fb8", "#b8073c", "#8007b8", "#bdbdbd", "#4eb807")
-  COLORCODE <- c("#855C75FF", "#D9AF6BFF", "#AF6458FF","#736F4CFF","#526A83FF", "#625377FF", "#68855CFF", "#9C9C5EFF", "#A06177FF", "#8C785DFF", "#467378FF", "#7C7C7CFF")
+  if (!is.null(colorcode)) COLORCODE <- colorcode
+
   # Feature selection
   # ============================================================
   if (length(shapley[["ids"]]) < 1) stop("no model ID was found")
@@ -120,11 +117,7 @@ shapley.domain <- function(shapley,
       ci = NA,
       lowerCI = NA,
       upperCI = NA)
-  }
 
-  # Print the bar plot at DOMAIN level
-  # ============================================================
-  if (plot == "bar" & !is.null(domains) ) {
     w <- shapley$weights
     # create a raw dataset for domain data
     results <- as.data.frame(shapley$results)
@@ -247,7 +240,12 @@ shapley.domain <- function(shapley,
     ftr <- SUMMARY$domain #FEATURES
     lci <- SUMMARY$lowerCI
     uci <- SUMMARY$upperCI
+  }
 
+
+  # Bar plot at DOMAIN level
+  # ============================================================
+  if (plot & !is.null(domains) ) {
 
     Plot <- ggplot(data = NULL,
                    aes(x = ftr,
@@ -259,7 +257,7 @@ shapley.domain <- function(shapley,
                     alpha = 0.75, linewidth = 0.7) +
       coord_flip() +  # Rotating the graph to have mean values on X-axis
       ggtitle("") +
-      xlab("Domains\n") +
+      xlab(paste0(xlab,"\n")) +
       ylab("\nWeighted Mean SHAP contributions of domains") +
       theme_classic() +
       # Reduce top plot margin
@@ -270,15 +268,14 @@ shapley.domain <- function(shapley,
                                  unit = "cm")) +
       # Set lower limit of expansion to 0
       scale_y_continuous(expand = expansion(mult = c(0, 0.05)))
-
-    Plot$domainSummary <- SUMMARY
-    Plot$domainRatio <- domainRatio
   }
 
-  print(Plot)
+  if (plot) print(Plot)
   if (print) print(SUMMARY)
 
-  return(Plot)
+  return(list(domainSummary = SUMMARY,
+              domainRatio   = domainRatio,
+              plot          = Plot))
 }
 
 
