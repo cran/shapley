@@ -1,4 +1,4 @@
-c2db197ca5d4cfca38c35668c07c18df *DESCRIPTION
+5f3dfb25f2d52b953002603b588a7775 *DESCRIPTION
 0be85954145f3add68a8c94cb8b3a291 *LICENSE
 07aaa095813bc264cd9bebe9342f2311 *NAMESPACE
 adbdeb2fcf5af7f6b87c0de443bac6e4 *R/feature.selection.R
@@ -6,11 +6,11 @@ adbdeb2fcf5af7f6b87c0de443bac6e4 *R/feature.selection.R
 58471f9fc540ce2692467c8fb72d118d *R/h2o.get_ids.R
 379b414f4851d8876bd2593014f5577b *R/normalize.R
 32f59c5934153f322b5749f13964a116 *R/shapley.R
-135bd1d0d2e67b40d1b8ed6e1ffd4ade *R/shapley.domain.R
-27ca87c9ea8d067427033768bf01d36b *R/shapley.domain.test.R
-093cddf0d781c6e95f205e26c2a33783 *R/shapley.feature.test.R
+5469df8c01b0b17cca9d340cd6ed78e3 *R/shapley.domain.R
+1b2561e042572c6a6d23858cd75d3816 *R/shapley.domain.test.R
+835b1429811ea021ef8d3c1b8f5b030f *R/shapley.feature.test.R
 d961e266db8acc66bc996f85904d1146 *R/shapley.plot.R
-6f0c93b52bac21f493b047295edc1242 *R/shapley.row.plot.R
+345fb0d947a68240e6c16128295fac38 *R/shapley.row.plot.R
 72bfc75ea7020f2ad53a6473194c5b7b *R/shapley.table.R
 7be5bcecab634df70fb9de4980514655 *R/shapley.top.R
 4c7639b8a80a861e7de05a359e73d870 *README.md
@@ -31,6 +31,6 @@ e499b0d7555e0d76db6733952850d8bf *man/figures/shapley.png
 849b1ef2eff7102966a084f111297557 *man/shapley.domain.test.Rd
 1452efbdc6705c0a9a38dcaa8bf51a9c *man/shapley.feature.test.Rd
 26a9e68f81d87e8faa351ac9cc297df2 *man/shapley.plot.Rd
-efff9f10a8cc96f3e864d91e5d72b6a0 *man/shapley.row.plot.Rd
+da275afe534b203edb3ea6285aa2dbf4 *man/shapley.row.plot.Rd
 b70610ee5b476c36e33a2b99ba57b65e *man/shapley.table.Rd
 83aeaca311718d739c63556e2cfebb9b *man/shapley.top.Rd

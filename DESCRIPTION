@@ -2,7 +2,7 @@ Package: shapley
 Type: Package
 Title: Weighted Mean SHAP and CI for Robust Feature Assessment in ML
         Grid
-Version: 0.6.0
+Version: 0.7.0
 Authors@R: 
     person("E. F. Haghish",
            role = c("aut", "cre", "cph"),
@@ -17,8 +17,8 @@ RoxygenNote: 7.3.3
 URL: https://github.com/haghish/shapley
 BugReports: https://github.com/haghish/shapley/issues
 NeedsCompilation: no
-Packaged: 2026-02-13 13:25:06 UTC; haghish
+Packaged: 2026-03-04 00:57:29 UTC; haghish
 Author: E. F. Haghish [aut, cre, cph]
 Maintainer: E. F. Haghish <haghish@hotmail.com>
 Repository: CRAN
-Date/Publication: 2026-02-13 18:00:02 UTC
+Date/Publication: 2026-03-04 06:40:02 UTC
